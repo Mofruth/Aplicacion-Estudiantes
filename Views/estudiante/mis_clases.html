@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Clases</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f5f7;
+        }
+
+        .sidebar {
+            width: 275px;
+            background-color: #2d3142;
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4facfe;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar-item {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #b8bcc8;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .sidebar-link:hover {
+            background-color: #3d4157;
+            color: white;
+        }
+
+        .sidebar-link.active {
+            background-color: #4facfe;
+            color: white;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            font-size: 32px;
+            font-weight: 700;
+            color: #4facfe;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .class-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-top: 4px solid #4facfe;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .class-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .class-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3142;
+            margin-bottom: 12px;
+        }
+
+        .class-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .class-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .class-time {
+            background: #e8f0ff;
+            color: #4facfe;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .no-classes {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-classes svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1200px) {
+            .classes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .classes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    {% set active_page = 'clases' %}
+    {% include 'estudiante/_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="page-header">Mis Clases</h1>
+
+        {% if horario %}
+        <div class="classes-grid">
+            {% for clase in horario %}
+            <div class="class-card">
+                <h3 class="class-name">{{ clase.materia }}</h3>
+                <div class="class-info">
+                    <div class="class-info-item">
+                        👨‍🏫 <strong>Profesor:</strong> {{ clase.profesor if clase.profesor else 'No asignado' }}
+                    </div>
+                    <div class="class-info-item">
+                        📅 <strong>Día:</strong> {{ clase.dia_semana }}
+                    </div>
+                    <div class="class-time">
+                        🕐 {{ clase.hora_inicio }} - {{ clase.hora_fin }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-classes">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+            </svg>
+            <h3>No tienes clases asignadas</h3>
+            <p>Cuando el administrador asigne tus horarios de clase, aparecerán aquí.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            // El activo es colocado por el servidor mediante `active_page` en la plantilla
+        });
+    </script>
+</body>
+</html>

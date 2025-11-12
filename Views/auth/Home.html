@@ -42,6 +42,19 @@
             padding: 2rem;
         }
 
+        /* 12-column layout helpers */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .col-12 { grid-column: 1 / -1; }
+        .col-10-center { grid-column: 2 / span 10; }
+        .col-8-center { grid-column: 3 / span 8; }
+        .col-4 { grid-column: span 4; }
+
         header {
             background-color: var(--primary);
             color: var(--white);
@@ -155,6 +168,48 @@
             gap: 2rem;
             margin-bottom: 3rem;
         }
+
+        /* Modal styles */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 1rem;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-panel {
+            background: var(--white);
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: auto;
+            box-shadow: 0 10px 30px rgba(2,6,23,0.2);
+            padding: 1.25rem 1.5rem;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--primary); }
+        .modal-body { color: var(--dark); font-size: 0.95rem; line-height: 1.6; }
 
         .card {
             background: var(--white);
@@ -301,10 +356,10 @@
             </div>
             
             <nav role="navigation" aria-label="Navegación principal">
-                <a href="#que-hacemos" tabindex="0">Qué hacemos</a>
-                <a href="#a-quien-servimos" tabindex="0">A quién servimos</a>
-                <a href="#quienes-somos" tabindex="0">Quiénes somos</a>
-                <a href="#recursos" tabindex="0">Recursos de aprendizaje</a>
+                <a href="#" data-modal-target="que-hacemos" tabindex="0">Qué hacemos</a>
+                <a href="#" data-modal-target="a-quien-servimos" tabindex="0">A quién servimos</a>
+                <a href="#" data-modal-target="quienes-somos" tabindex="0">Quiénes somos</a>
+                <a href="#" data-modal-target="recursos" tabindex="0">Recursos de aprendizaje</a>
             </nav>
             
             <div class="auth-buttons">
@@ -315,18 +370,24 @@
     </header>
 
     <main id="contenido-principal" role="main">
-        <h1>Bienvenido a Ebook Study Control y gestión Académica</h1>
+        <div class="container grid">
+            <h1 class="col-10-center">Bienvenido a Ebook Study Control y gestión Académica</h1>
 
-        <section class="cards-container" aria-label="Sección de artículos informativos">
+            <section class="cards-container col-10-center" aria-label="Sección de artículos informativos">
             <article class="card">
                 <img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=600&h=400&fit=crop" alt="Laptop junto a una taza de café y cuaderno" class="card-image">
                 <div class="card-content">
                     <h2 class="card-title">Información sobre el software:</h2>
                     <p class="card-description">Usabilidad del software en docentes, instituciones y estudiantes de nivel autónoma.</p>
                     <div class="card-footer">
-                        <a href="#" class="card-link" aria-label="Leer más sobre información del software">Seguir leyendo...</a>
+                        <a href="#" class="card-link" data-modal-target="card-1" aria-label="Leer más sobre información del software">Seguir leyendo...</a>
                         <div class="external-icon" aria-hidden="true">↗</div>
                     </div>
+                </div>
+                <div id="card-1" class="modal-template" style="display:none;">
+                    <h3>Información sobre el software</h3>
+                    <p>En Ebook Study ofrecemos una plataforma diseñada para facilitar la gestión académica, con herramientas específicas para docentes, administradores y estudiantes. Nuestro objetivo es mejorar la eficiencia de las tareas diarias y la comunicación institucional.</p>
+                    <p>La plataforma permite gestionar usuarios, materias, horarios, inscripciones, calificaciones y notificaciones, con un enfoque en accesibilidad y usabilidad.</p>
                 </div>
             </article>
 
@@ -336,9 +397,13 @@
                     <h2 class="card-title">Desarrollo sostenible para instituciones Académicas:</h2>
                     <p class="card-description">Potenciando más del 100% de las tareas diarias en la continuidad académica</p>
                     <div class="card-footer">
-                        <a href="#" class="card-link" aria-label="Leer más sobre desarrollo sostenible">Seguir leyendo...</a>
+                        <a href="#" class="card-link" data-modal-target="card-2" aria-label="Leer más sobre desarrollo sostenible">Seguir leyendo...</a>
                         <div class="external-icon" aria-hidden="true">↗</div>
                     </div>
+                </div>
+                <div id="card-2" class="modal-template" style="display:none;">
+                    <h3>Desarrollo sostenible para instituciones Académicas</h3>
+                    <p>Nuestras soluciones ayudan a optimizar los procesos administrativos y pedagógicos, reduciendo tiempos y costos, y promoviendo prácticas sostenibles en la gestión académica.</p>
                 </div>
             </article>
 
@@ -348,16 +413,105 @@
                     <h2 class="card-title">Uso de nuevas tecnologías</h2>
                     <p class="card-description">Nuevas implementaciones de sistemas adecuadas para el uso académico y estudiantil</p>
                     <div class="card-footer">
-                        <a href="#" class="card-link" aria-label="Leer más sobre uso de nuevas tecnologías">Seguir leyendo...</a>
+                        <a href="#" class="card-link" data-modal-target="card-3" aria-label="Leer más sobre uso de nuevas tecnologías">Seguir leyendo...</a>
                         <div class="external-icon" aria-hidden="true">↗</div>
                     </div>
                 </div>
+                <div id="card-3" class="modal-template" style="display:none;">
+                    <h3>Uso de nuevas tecnologías</h3>
+                    <p>Integramos herramientas modernas que facilitan el aprendizaje, el seguimiento de resultados y la interoperabilidad con sistemas existentes. Priorizamos la experiencia del usuario y la escalabilidad.</p>
+                </div>
             </article>
         </section>
+        </div>
+
+        <!-- Modal backdrop -->
+        <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+            <div class="modal-panel" role="document">
+                <button class="modal-close" aria-label="Cerrar modal">✕</button>
+                <div class="modal-content">
+                    <h2 class="modal-title" id="modalTitle"></h2>
+                    <div class="modal-body" id="modalBody"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden modal templates for nav items -->
+        <div id="que-hacemos" class="modal-template" style="display:none;">
+            <h3>Qué hacemos</h3>
+            <p>Desarrollamos una plataforma integral para la gestión académica que cubre inscripciones, horarios, notas, comunicación entre docentes y estudiantes, y reportes administrativos.</p>
+        </div>
+        <div id="a-quien-servimos" class="modal-template" style="display:none;">
+            <h3>A quién servimos</h3>
+            <p>Instituciones educativas, docentes, estudiantes y padres de familia que buscan una solución accesible y eficiente para gestionar procesos académicos.</p>
+        </div>
+        <div id="quienes-somos" class="modal-template" style="display:none;">
+            <h3>Quiénes somos</h3>
+            <p>Equipo multidisciplinario enfocado en soluciones educativas, con experiencia en desarrollo de software, pedagogía y gestión institucional.</p>
+        </div>
+        <div id="recursos" class="modal-template" style="display:none;">
+            <h3>Recursos de aprendizaje</h3>
+            <p>Ofrecemos material de apoyo, guías de uso, tutoriales y recursos didácticos para maximizar el aprovechamiento de la plataforma.</p>
+        </div>
     </main>
 
     <footer role="contentinfo">
         <p>&copy; 2025 Ebook Study. Todos los derechos reservados.</p>
     </footer>
+</footer>
+
+<script>
+// Modal logic
+(() => {
+    const backdrop = document.getElementById('modalBackdrop');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const closeBtn = document.querySelector('.modal-close');
+
+    function openModalFromTemplate(id) {
+        const tpl = document.getElementById(id);
+        if (!tpl) return;
+        // Clone content
+        const titleEl = tpl.querySelector('h3');
+        modalTitle.textContent = titleEl ? titleEl.textContent : '';
+        // Build body from template's children (skip title)
+        let bodyHtml = '';
+        Array.from(tpl.children).forEach(child => {
+            if (child.tagName.toLowerCase() === 'h3') return;
+            bodyHtml += child.outerHTML;
+        });
+        modalBody.innerHTML = bodyHtml;
+        backdrop.classList.add('open');
+        backdrop.setAttribute('aria-hidden', 'false');
+        // trap focus lightly
+        closeBtn.focus();
+    }
+
+    function closeModal() {
+        backdrop.classList.remove('open');
+        backdrop.setAttribute('aria-hidden', 'true');
+        modalTitle.textContent = '';
+        modalBody.innerHTML = '';
+    }
+
+    // Attach clicks to any element with data-modal-target
+    document.querySelectorAll('[data-modal-target]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = el.getAttribute('data-modal-target');
+            if (target) openModalFromTemplate(target);
+        });
+    });
+
+    // Close handlers
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && backdrop.classList.contains('open')) closeModal();
+    });
+})();
+</script>
 </body>
 </html>

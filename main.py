@@ -2,6 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from config_email import EMAIL_HOST, EMAIL_HOST_PASSWORD, EMAIL_PORT, EMAIL_HOST_USER
+import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from Config.database_connection import create_connection
@@ -14,6 +15,34 @@ import sqlite3  # O el conector que uses
 
 app = Flask(__name__, template_folder='Views', static_folder='Static')
 app.secret_key = 'clave_secreta_gestion_estudiantil_2023'
+
+# OAuth (Google) - intenta habilitar sólo si `authlib` está instalada y las credenciales están configuradas.
+oauth = None
+try:
+    # Importa authlib sólo si está disponible en el entorno
+    from authlib.integrations.flask_client import OAuth  # type: ignore
+except ImportError:
+    app.logger.info('authlib no está instalada; Google OAuth deshabilitado.')
+    oauth = None
+else:
+    # Comprueba que las credenciales estén en las variables de entorno
+    google_client_id = os.environ.get('GOOGLE_CLIENT_ID')
+    google_client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+    if not google_client_id or not google_client_secret:
+        app.logger.warning('Google OAuth deshabilitado: faltan GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET en variables de entorno.')
+        oauth = None
+    else:
+        oauth = OAuth(app)
+        oauth.register(
+            name='google',
+            client_id=google_client_id,
+            client_secret=google_client_secret,
+            access_token_url='https://oauth2.googleapis.com/token',
+            authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
+            api_base_url='https://www.googleapis.com/oauth2/v2/',
+            userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+            client_kwargs={'scope': 'openid email profile'}
+        )
 
 def get_db_connection():
     conn = sqlite3.connect('tu_base_de_datos.db')
@@ -135,6 +164,68 @@ def register():
 def logout():
     session.clear()
     return redirect(url_for('home'))
+
+
+@app.route('/login/google')
+def login_google():
+    if oauth is None:
+        flash('Inicio de sesión con Google no está disponible (dependencia faltante).', 'error')
+        return redirect(url_for('login'))
+    redirect_uri = url_for('authorize_google', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@app.route('/authorize/google')
+def authorize_google():
+    if oauth is None:
+        flash('Inicio de sesión con Google no está disponible (dependencia faltante).', 'error')
+        return redirect(url_for('login'))
+    try:
+        token = oauth.google.authorize_access_token()
+        # Obtener información del usuario
+        resp = oauth.google.get('userinfo')
+        user_info = resp.json()
+        email = user_info.get('email')
+        nombre = user_info.get('name') or user_info.get('given_name') or email
+        if not email:
+            flash('No se pudo obtener el correo desde Google.', 'error')
+            return redirect(url_for('login'))
+
+        # Buscar usuario en la tabla estudiantes
+        conexion = create_connection()
+        if conexion:
+            try:
+                cursor = conexion.cursor(dictionary=True)
+                cursor.execute("SELECT id, nombre, correo FROM estudiantes WHERE correo=%s", (email,))
+                usuario = cursor.fetchone()
+                if usuario:
+                    session['usuario'] = {'id': usuario['id'], 'nombre': usuario['nombre'], 'correo': usuario['correo'], 'tipo': 'estudiante'}
+                    flash('Inicio de sesión con Google exitoso.', 'success')
+                    return redirect(url_for('dashboard'))
+                else:
+                    # Crear estudiante nuevo (sin contraseña) y marcarlo para revisión si es necesario
+                    cursor.execute("INSERT INTO estudiantes (nombre, correo) VALUES (%s, %s)", (nombre, email))
+                    conexion.commit()
+                    new_id = cursor.lastrowid
+                    session['usuario'] = {'id': new_id, 'nombre': nombre, 'correo': email, 'tipo': 'estudiante'}
+                    flash('Cuenta creada e iniciada con Google. Si requiere aprobación, el administrador podrá gestionarla.', 'success')
+                    return redirect(url_for('dashboard'))
+            except Exception as e:
+                app.logger.error(f"Error en login Google: {e}")
+                flash('Ocurrió un error al iniciar sesión con Google.', 'error')
+            finally:
+                try:
+                    cursor.close()
+                except Exception:
+                    pass
+                try:
+                    conexion.close()
+                except Exception:
+                    pass
+    except Exception as e:
+        app.logger.error(f"Error autorizando con Google: {e}")
+        flash('Error durante la autorización con Google.', 'error')
+    return redirect(url_for('login'))
 
 # --------------------------
 # Dashboard y rutas por rol
@@ -744,74 +835,134 @@ def estudiante_dashboard():
     if 'usuario' not in session or session['usuario']['tipo'] != 'estudiante':
         return redirect(url_for('home'))
     try:
-        conexion = create_connection()
-        if not conexion:
-            flash("Error de conexión con la base de datos", "error")
-            return render_template('estudiante/dashboard.html', usuario=session['usuario'])
-        with conexion.cursor(dictionary=True) as cursor:
-            notificaciones = []
-            cursor.execute("SHOW TABLES LIKE 'notificaciones'")
-            if cursor.fetchone():
-                cursor.execute("SHOW COLUMNS FROM notificaciones LIKE 'mensaje'")
-                if cursor.fetchone():
-                    cursor.execute("""
-                        SELECT mensaje, fecha 
-                        FROM notificaciones 
-                        WHERE id_estudiante = %s
-                        ORDER BY fecha DESC
-                        LIMIT 5
-                    """, (session['usuario']['id'],))
-                    notificaciones = cursor.fetchall()
-            materias = []
-            cursor.execute("SHOW TABLES LIKE 'inscripciones'")
-            if cursor.fetchone():
-                cursor.execute("""
-                    SELECT m.id, m.nombre 
-                    FROM inscripciones i
-                    JOIN materias m ON i.id_materia = m.id
-                    WHERE i.id_estudiante = %s
-                """, (session['usuario']['id'],))
-                materias = cursor.fetchall()
-            # OBTENER ÚLTIMO COMENTARIO
-            cursor.execute("""
-                SELECT n.comentario, m.nombre AS materia, p.nombre AS profesor
-                FROM notas n
-                JOIN materias m ON n.id_materia = m.id
-                JOIN profesores p ON n.id_profesor = p.id
-                WHERE n.id_estudiante = %s AND n.comentario IS NOT NULL AND n.comentario != ''
-                ORDER BY n.id DESC
-                LIMIT 1
-            """, (session['usuario']['id'],))
-            comentarios = cursor.fetchall()
-            estadisticas = []
-            try:
-                cursor.execute("""
-                    SELECT m.nombre AS materia, 
-                           ROUND(AVG(n.nota), 2) AS promedio
-                    FROM inscripciones i
-                    JOIN materias m ON i.id_materia = m.id
-                    LEFT JOIN notas n ON n.id_materia = m.id AND n.id_estudiante = i.id_estudiante
-                    WHERE i.id_estudiante = %s
-                    GROUP BY m.id
-                """, (session['usuario']['id'],))
-                estadisticas = cursor.fetchall()
-            except Exception as e:
-                estadisticas = []
-            return render_template(
-                'estudiante/dashboard.html',
-                usuario=session['usuario'],
-                notificaciones=notificaciones,
-                materias=materias,
-                comentarios=comentarios,
-                estadisticas=estadisticas
-            )
+        id_estudiante = session['usuario']['id']
+        # Obtener todos los datos del dashboard usando el controlador
+        datos_dashboard = EstudianteController.obtener_datos_dashboard(id_estudiante)
+        
+        return render_template(
+            'estudiante/dashboard.html',
+            usuario=session['usuario'],
+            tareas_pendientes=datos_dashboard['tareas_pendientes'],
+            asistencia=datos_dashboard['asistencia'],
+            materias=datos_dashboard['estadisticas'],
+            promedio_general=datos_dashboard['promedio_general'],
+            estadisticas=datos_dashboard['estadisticas'],
+            notificaciones=datos_dashboard['notificaciones']
+        )
     except Exception as e:
         app.logger.error(f"Error en estudiante dashboard: {str(e)}")
         flash("Ocurrió un error al cargar el dashboard", "error")
-        return render_template('estudiante/dashboard.html', usuario=session['usuario'])
+        return redirect(url_for('home'))
     finally:
-        if 'conexion' in locals() and conexion:
-            conexion.close()
+        pass
+
+
+# Ruta: Mis Clases (nueva - renderiza la plantilla personalizada)
+@app.route('/estudiante/clases')
+def clases_estudiante():
+    if 'usuario' not in session or session['usuario']['tipo'] != 'estudiante':
+        flash("No tienes permisos para acceder a esta sección.", "error")
+        return redirect(url_for('home'))
+    id_estudiante = session['usuario']['id']
+    try:
+        horario = EstudianteController.obtener_horario(id_estudiante)
+        return render_template('estudiante/mis_clases.html', usuario=session['usuario'], horario=horario)
+    except Exception as e:
+        app.logger.error(f"Error al cargar Mis Clases: {e}")
+        flash("Ocurrió un error al cargar tus clases.", "error")
+        return redirect(url_for('estudiante_dashboard'))
+
+
+# Ruta: Asignaturas (lista de materias disponibles)
+@app.route('/estudiante/asignaturas')
+def asignaturas_estudiante():
+    if 'usuario' not in session or session['usuario']['tipo'] != 'estudiante':
+        flash("No tienes permisos para acceder a esta sección.", "error")
+        return redirect(url_for('home'))
+    usuario = session['usuario']
+    conexion = create_connection()
+    materias = []
+    try:
+        if conexion:
+            cursor = conexion.cursor(dictionary=True)
+            cursor.execute("SELECT id, nombre, descripcion FROM materias ORDER BY nombre")
+            materias = cursor.fetchall()
+            # Obtener permiso de inscripción del estudiante para mostrar botones
+            cursor.execute("SELECT puede_inscribirse FROM estudiantes WHERE id=%s", (usuario['id'],))
+            permiso = cursor.fetchone()
+            usuario['puede_inscribirse'] = permiso['puede_inscribirse'] if permiso and 'puede_inscribirse' in permiso else False
+            session['usuario'] = usuario
+    except Exception as e:
+        app.logger.error(f"Error al cargar Asignaturas: {e}")
+        flash("Ocurrió un error al cargar las asignaturas.", "error")
+    finally:
+        try:
+            cursor.close()
+        except Exception:
+            pass
+        try:
+            if conexion:
+                conexion.close()
+        except Exception:
+            pass
+    return render_template('estudiante/mis_asignaturas.html', usuario=usuario, materias=materias)
+
+
+# Ruta: Mis Calificaciones (nueva)
+@app.route('/estudiante/calificaciones')
+def calificaciones_estudiante():
+    if 'usuario' not in session or session['usuario']['tipo'] != 'estudiante':
+        flash("No tienes permisos para acceder a esta sección.", "error")
+        return redirect(url_for('home'))
+    id_estudiante = session['usuario']['id']
+    try:
+        datos = EstudianteController.obtener_calificaciones_detalle(id_estudiante)
+        return render_template(
+            'estudiante/mis_calificaciones.html',
+            usuario=session['usuario'],
+            notas=datos['notas'],
+            notas_por_materia=datos['estadisticas'],
+            promedio_general=datos['promedio_general']
+        )
+    except Exception as e:
+        app.logger.error(f"Error al cargar Calificaciones: {e}")
+        flash("Ocurrió un error al cargar tus calificaciones.", "error")
+        return redirect(url_for('estudiante_dashboard'))
+
+
+# Ruta: Mis Notificaciones (nueva)
+@app.route('/estudiante/notificaciones')
+def notificaciones_estudiante():
+    if 'usuario' not in session or session['usuario']['tipo'] != 'estudiante':
+        flash("No tienes permisos para acceder a esta sección.", "error")
+        return redirect(url_for('home'))
+    id_estudiante = session['usuario']['id']
+    try:
+        notificaciones = EstudianteController.obtener_notificaciones(id_estudiante)
+        return render_template('estudiante/mis_notificaciones.html', usuario=session['usuario'], notificaciones=notificaciones)
+    except Exception as e:
+        app.logger.error(f"Error al cargar Notificaciones: {e}")
+        flash("Ocurrió un error al cargar tus notificaciones.", "error")
+        return redirect(url_for('estudiante_dashboard'))
+
+
+# Ruta: Mis Tareas (nueva)
+@app.route('/estudiante/tareas')
+def tareas_estudiante():
+    if 'usuario' not in session or session['usuario']['tipo'] != 'estudiante':
+        flash("No tienes permisos para acceder a esta sección.", "error")
+        return redirect(url_for('home'))
+    id_estudiante = session['usuario']['id']
+    try:
+        tareas = EstudianteController.obtener_tareas_detalle(id_estudiante)
+        return render_template('estudiante/mis_tareas.html', usuario=session['usuario'], tareas=tareas)
+    except Exception as e:
+        app.logger.error(f"Error al cargar Tareas: {e}")
+        flash("Ocurrió un error al cargar tus tareas.", "error")
+        return redirect(url_for('estudiante_dashboard'))
+
+
+# Ajustar ruta existente de horario para usar la plantilla nueva `mi_horario.html`
 
 @app.route('/estudiante/ver_notas')
 def ver_notas():
@@ -850,6 +1001,7 @@ def ver_clases():
     usuario = session['usuario']
     conexion = create_connection()
     horario = []
+    materias = []
     if conexion:
         try:
             cursor = conexion.cursor(dictionary=True)
@@ -891,12 +1043,66 @@ def horario_estudiante():
             """
             cursor.execute(query, (usuario['id'],))
             horario = cursor.fetchall()
+            # Obtener materias disponibles para inscribirse
+            cursor.execute("SELECT id, nombre FROM materias ORDER BY nombre")
+            materias = cursor.fetchall()
+            # Obtener permiso de inscripción del estudiante
+            cursor.execute("SELECT puede_inscribirse FROM estudiantes WHERE id=%s", (usuario['id'],))
+            permiso = cursor.fetchone()
+            usuario['puede_inscribirse'] = permiso['puede_inscribirse'] if permiso and 'puede_inscribirse' in permiso else False
+            # Asegura que la sesión refleje el permiso (para la plantilla)
+            session['usuario'] = usuario
         except Exception as e:
             flash(f"Error al obtener el horario: {e}", "error")
         finally:
             cursor.close()
             conexion.close()
-    return render_template('estudiante/horario.html', usuario=usuario, horario=horario)
+    return render_template('estudiante/mi_horario.html', usuario=usuario, horario=horario, materias=materias)
+
+
+@app.route('/estudiante/inscribir', methods=['POST'])
+def inscribir_materia():
+    if 'usuario' not in session or session['usuario']['tipo'] != 'estudiante':
+        flash("No tienes permisos para realizar esta acción.", "error")
+        return redirect(url_for('home'))
+    usuario = session['usuario']
+    id_materia = request.form.get('id_materia')
+    if not id_materia:
+        flash("Materia no especificada.", "error")
+        return redirect(url_for('horario_estudiante'))
+
+    conexion = create_connection()
+    if not conexion:
+        flash("Error de conexión con la base de datos.", "error")
+        return redirect(url_for('horario_estudiante'))
+
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        # Verificar si el estudiante tiene permiso para inscribirse
+        cursor.execute("SELECT puede_inscribirse FROM estudiantes WHERE id=%s", (usuario['id'],))
+        fila = cursor.fetchone()
+        if not fila or not fila.get('puede_inscribirse'):
+            flash("No estás autorizado para inscribirte. Contacta al administrador.", "error")
+            return redirect(url_for('horario_estudiante'))
+
+        # Insertar la solicitud/inscripción (evita duplicados)
+        cursor.execute("INSERT IGNORE INTO inscripciones (id_estudiante, id_materia) VALUES (%s, %s)", (usuario['id'], id_materia))
+        conexion.commit()
+        flash("Solicitud de inscripción enviada. Espera la aprobación del administrador.", "success")
+    except Exception as e:
+        app.logger.error(f"Error al inscribirse en la materia: {e}")
+        flash(f"Ocurrió un error al inscribirte: {e}", "error")
+    finally:
+        try:
+            cursor.close()
+        except Exception:
+            pass
+        try:
+            conexion.close()
+        except Exception:
+            pass
+
+    return redirect(url_for('horario_estudiante'))
 # --------------------------
 # Rutas PADRE
 # --------------------------

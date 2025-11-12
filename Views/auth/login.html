@@ -5,103 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Google font for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root{--primary:#4361ee;--bg:#f8fafc}
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
             margin: 0;
-            padding: 2rem;
             color: #212529;
         }
 
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            padding: 2rem;
+        .page {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            min-height: 100vh;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            color: #4361ee;
-            text-align: center;
-            margin-bottom: 1.5rem;
+        .hero {
+            background-image: url('{{ url_for("static", filename="img/login.jpg") }}');
+            background-size: cover;
+            background-position: center;
+            position: relative;
         }
 
-        label {
-            display: block;
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
+        /* Right panel */
+        .panel {
+            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+            padding: 48px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        input, select {
-            width: 100%;
-            padding: 0.8rem;
-            font-size: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+        .brand {
+            display:flex;align-items:center;gap:12px;margin-bottom:18px;
         }
 
-        button {
-            width: 100%;
-            padding: 0.8rem;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #ffffff;
-            background-color: #4361ee;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+        .brand-logo{width:48px;height:48px;background:#000;border-radius:6px;display:inline-block}
 
-        button:hover {
-            background-color: #3a56d4;
-        }
+        .title {font-size:24px;font-weight:700;color:var(--primary);margin-bottom:18px}
 
-        .register-link {
-            text-align: center;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
+        form{display:flex;flex-direction:column;gap:12px}
+        label{font-size:13px;color:#444}
+        input, select{padding:12px;border:1px solid #e6e6e6;border-radius:8px;font-size:14px}
 
-        .register-link a {
-            color: #4361ee;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        .actions{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+        .primary-btn{background:var(--primary);color:#fff;padding:12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
 
-        .register-link a:hover {
-            text-decoration: underline;
+        .social-row{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+        .social-btn{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;border:1px solid #e6e6e6;background:#fff;cursor:pointer;text-decoration:none;color:inherit}
+        .google-icon{width:20px;height:20px}
+
+        .secondary {text-align:center;margin-top:10px;font-size:13px}
+
+        @media (max-width:1000px){
+            .page{grid-template-columns:1fr}
+            .hero{display:none}
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Iniciar Sesión</h1>
-        <form method="POST" action="{{ url_for('login') }}">
-            <label for="correo">Correo:</label>
-            <input type="email" name="correo" id="correo" required>
+    <div class="page">
+        <div class="hero"></div>
+        <div class="panel">
+            <div class="brand">
+                <div class="brand-logo"></div>
+                <div>
+                    <div style="font-size:12px;color:#888">EBOOK STUDY</div>
+                    <div style="font-size:12px;color:#aaa">Bienvenido de vuelta</div>
+                </div>
+            </div>
+            <div class="title">Bienvenido de vuelta querido usuario</div>
 
-            <label for="contraseña">Contraseña:</label>
-            <input type="password" name="contraseña" id="contraseña" required>
+            <form method="POST" action="{{ url_for('login') }}">
+                <label for="correo">Email:</label>
+                <input type="email" name="correo" id="correo" placeholder="Ingresa tu Email" required>
 
-            <label for="rol">Rol:</label>
-            <select name="rol" id="rol" required>
-                <option value="" disabled selected>Selecciona un rol</option>
-                <option value="admin">Administrador</option>
-                <option value="profesor">Profesor</option>
-                <option value="estudiante">Estudiante</option>
-                <option value="padre">Acudiente</option>
-            </select>
+                <label for="contraseña">Contraseña:</label>
+                <input type="password" name="contraseña" id="contraseña" placeholder="Ingrese su contraseña" required>
 
-            <button type="submit">Ingresar</button>
-        </form>
-        <div class="register-link">
-            ¿No tienes cuenta? <a href="{{ url_for('register') }}">Registrarse</a>
+                <label for="rol">Iniciar como:</label>
+                <select name="rol" id="rol" required>
+                    <option value="estudiante" selected>Estudiante</option>
+                    <option value="profesor">Profesor</option>
+                    <option value="admin">Administrador</option>
+                    <option value="padre">Acudiente</option>
+                </select>
+
+                <div class="actions">
+                    <button class="primary-btn" type="submit">Iniciar Sesión</button>
+                </div>
+            </form>
+
+            <div class="secondary">O inicia sesión con</div>
+            <div class="social-row">
+                <a class="social-btn" href="{{ url_for('login_google') }}">
+                    <img class="google-icon" src="https://www.svgrepo.com/show/355037/google.svg" alt="Google">
+                    Iniciar sesión con Google
+                </a>
+            </div>
+
+            <div class="secondary">¿Todavía no tienes una cuenta? <a href="{{ url_for('register') }}">Crea una Ahora</a></div>
         </div>
     </div>
 </body>
