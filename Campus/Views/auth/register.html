@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro | QNote</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(120deg, #f1f5f9 60%, #e0e7ff 100%);
+            margin: 0;
+            padding: 0;
+            color: #1e293b;
+        }
+        .register-container {
+            max-width: 440px;
+            margin: 2.5em auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #0002;
+            padding: 2.5em 2em 2em 2em;
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 1.5em;
+        }
+        .register-header img {
+            width: 85%;
+            max-width: 340px;
+            border-radius: 14px;
+            margin-bottom: 1.2em;
+            box-shadow: 0 2px 12px #0001;
+        }
+        .register-header h1 {
+            font-size: 2em;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 0.2em;
+            letter-spacing: -1px;
+        }
+        .register-header p {
+            color: #334155;
+            font-size: 1.1em;
+            margin-bottom: 0.5em;
+        }
+        label {
+            display: block;
+            font-size: 1em;
+            margin-bottom: 0.4em;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.8em;
+            font-size: 1em;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 1.2em;
+            background: #f8fafc;
+            transition: border 0.2s;
+        }
+        input:focus, select:focus {
+            border: 1.5px solid #2563eb;
+            outline: none;
+        }
+        .btn-registro {
+            width: 100%;
+            padding: 0.9em;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #fff;
+            background-color: #2563eb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0001;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .btn-registro:hover {
+            background-color: #1d4ed8;
+            transform: scale(1.03);
+        }
+        .login-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5em;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1em;
+            transition: color 0.2s;
+        }
+        .login-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <img src="https://images.unsplash.com/photo-1513258496099-48168024aec0?w=900&h=300&fit=crop" alt="Registro en QNote">
+            <h1>Crear cuenta en QNote</h1>
+            <p>Regístrate para acceder a la plataforma de gestión académica.</p>
+        </div>
+        <form method="POST" action="{{ url_for('register') }}">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" name="nombre" id="nombre" required autocomplete="name">
+
+            <label for="correo">Correo electrónico</label>
+            <input type="email" name="correo" id="correo" required autocomplete="email">
+
+            <label for="rol">Rol</label>
+            <select name="rol" id="rol" required>
+                <option value="" disabled selected>Selecciona un rol</option>
+                <option value="admin">Administrador</option>
+                <option value="profesor">Profesor</option>
+                <option value="estudiante">Estudiante</option>
+                <option value="padre">Padre</option>
+            </select>
+
+            <label for="contraseña">Contraseña</label>
+            <input type="password" name="contraseña" id="contraseña" required autocomplete="new-password">
+
+            <button type="submit" class="btn-registro">Registrarse</button>
+        </form>
+        <a href="{{ url_for('login') }}" class="login-link">¿Ya tienes cuenta? Inicia sesión</a>
+    </div>
+</body>
+</html>
