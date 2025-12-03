@@ -218,6 +218,7 @@ La aplicación estará disponible en `http://localhost:5000`
 ## Contribuidores
 
 - Elvis094
+- Litber33
 
 ## Licencia
 
@@ -225,4 +226,4 @@ Este proyecto es propiedad de la institución educativa y se desarrolló como pa
 
 ## Contacto
 
-Para reportar bugs o sugerencias, contacta a Elvis094 en GitHub.
+Para reportar bugs o sugerencias, contacta a Elvis094, Litber33 en GitHub.

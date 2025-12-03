@@ -31,17 +31,42 @@ class Estudiante:
         return None
 
     @staticmethod
+    def obtener_por_correo(correo):
+        """Obtiene un estudiante por su correo."""
+        conexion = create_connection()
+        if conexion:
+            try:
+                with conexion.cursor(dictionary=True) as cursor:
+                    query = "SELECT * FROM estudiantes WHERE correo = %s"
+                    cursor.execute(query, (correo,))
+                    est_data = cursor.fetchone()
+                    if est_data:
+                        return Estudiante(
+                            id=est_data['id'],
+                            nombre=est_data['nombre'],
+                            correo=est_data['correo'],
+                            contraseña=est_data['contraseña']
+                        )
+            except Exception as e:
+                print(f"Error al obtener estudiante por correo: {e}")
+            finally:
+                conexion.close()
+        return None
+
+    @staticmethod
     def obtener_notas(id_estudiante):
-        """Obtiene las notas de un estudiante por su ID."""
+        """Obtiene las notas de un estudiante por su ID con comentario y fecha."""
         conexion = create_connection()
         if conexion:
             try:
                 with conexion.cursor(dictionary=True) as cursor:
                     query = """
-                        SELECT m.nombre AS materia, n.nota
+                        SELECT m.nombre AS materia, n.nota, n.comentario, 
+                               DATE_FORMAT(n.fecha, '%Y-%m-%d %H:%i') AS fecha
                         FROM notas n
                         JOIN materias m ON n.id_materia = m.id
                         WHERE n.id_estudiante = %s
+                        ORDER BY n.fecha DESC
                     """
                     cursor.execute(query, (id_estudiante,))
                     return cursor.fetchall()

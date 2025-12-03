@@ -68,32 +68,35 @@ input:focus, select:focus {
     outline: none;
 }
 
-/* Botones */
-.btn {
-    display: inline-block;
-    width: 100%;
-    padding: 0.75rem 1.5rem;
-    background-color: var(--primary);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.2s;
+/* Botones profesionales */
+.btn, button, input[type="submit"] {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6em 1.5em;
+  font-weight: 600;
+  font-size: 1.05em;
+  box-shadow: 0 2px 8px #0001;
+  transition: background 0.2s, transform 0.2s;
+  cursor: pointer;
 }
-
-.btn:hover {
-    background-color: var(--primary-dark);
+.btn:hover, button:hover, input[type="submit"]:hover {
+  background: #1d4ed8;
+  transform: scale(1.04);
 }
-
-.btn-danger {
-    background-color: var(--danger);
+.btn-outline {
+  background: #fff;
+  color: #2563eb;
+  border: 2px solid #2563eb;
 }
-
-.btn-danger:hover {
-    background-color: #b91c1c;
+.btn-outline:hover {
+  background: #2563eb;
+  color: #fff;
+}
+.btn-sm {
+  padding: 0.3em 1em;
+  font-size: 0.95em;
 }
 
 /* Enlaces */
