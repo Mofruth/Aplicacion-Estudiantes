@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QNote - Campus Virtual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(120deg, #f1f5f9 60%, #e0e7ff 100%);
+            color: var(--dark);
+            margin: 0;
+            min-height: 100vh;
+        }
+        header {
+            background: #fff;
+            box-shadow: 0 2px 12px #0001;
+            padding: 0.5em 0;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2em;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7em;
+        }
+        .logo-icon {
+            font-size: 2.1em;
+            color: var(--primary);
+        }
+        .logo-text {
+            font-size: 1.7em;
+            font-weight: 800;
+            color: var(--primary-dark);
+            letter-spacing: -1px;
+        }
+        .auth-buttons a {
+            margin-left: 1em;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5em 1.5em;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-login {
+            background: #fff;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-login:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-registro {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+        }
+        .btn-registro:hover {
+            background: var(--primary-dark);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5em 1em 1em 1em;
+        }
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 2.5em;
+        }
+        .welcome-title {
+            font-size: 2.7em;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 0.2em;
+            letter-spacing: -1px;
+        }
+        .welcome-desc {
+            font-size: 1.3em;
+            color: #334155;
+            margin-bottom: 1.2em;
+            font-weight: 500;
+        }
+        .carousel {
+            position: relative;
+            min-height: 540px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 4px 32px #0002;
+            padding: 3em 2em 2em 2em;
+        }
+        .carousel-img {
+            width: 100%;
+            max-width: 1100px;
+            height: 370px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 2em;
+            box-shadow: 0 2px 16px #0002;
+        }
+        .carousel-slide {
+            display: none;
+            text-align: center;
+        }
+        .carousel-slide.active {
+            display: block;
+            animation: fadein 0.7s;
+        }
+        .carousel-title {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 0.5em;
+            letter-spacing: -1px;
+        }
+        .carousel-desc {
+            font-size: 1.25em;
+            color: #334155;
+            margin-bottom: 1.5em;
+            font-weight: 500;
+        }
+        @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+        footer {
+            background: #fff;
+            color: #64748b;
+            text-align: center;
+            padding: 1.5em 0 1em 0;
+            margin-top: 3em;
+            border-top: 1px solid #e5e7eb;
+            font-size: 1em;
+        }
+        @media (max-width: 900px) {
+            .carousel-img { height: 180px; }
+            .carousel-title { font-size: 1.2em; }
+            .carousel-desc { font-size: 1em; }
+            .welcome-title { font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon" aria-hidden="true">📚</div>
+                <div class="logo-text">QNote</div>
+            </div>
+            <div class="auth-buttons">
+                <a class="btn btn-login" href="{{ url_for('login') }}">Iniciar sesión</a>
+                <a class="btn btn-registro" href="{{ url_for('register') }}">Registrarse</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="contenido-principal" role="main">
+        <div class="container">
+            <section class="welcome-section">
+                <div class="welcome-title">Bienvenido a QNote Campus Virtual</div>
+                <div class="welcome-desc">
+                    La plataforma integral para la gestión académica, comunicación y aprendizaje.<br>
+                    Accede a tus clases, tareas, calificaciones y recursos desde cualquier lugar.
+                </div>
+            </section>
+            <div id="infoCarousel" class="carousel">
+                <div class="carousel-slide active">
+                    <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=450&fit=crop" alt="Gestión académica moderna" class="carousel-img">
+                    <div class="carousel-title">Gestión Académica Moderna</div>
+                    <div class="carousel-desc">Organiza materias, tareas y calificaciones en un solo lugar, con acceso seguro y personalizado.</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1503676382389-4809596d5290?w=1200&h=450&fit=crop" alt="Innovación educativa" class="carousel-img">
+                    <div class="carousel-title">Innovación para Instituciones</div>
+                    <div class="carousel-desc">Automatiza procesos administrativos y académicos, ahorrando tiempo y recursos.</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=1200&h=450&fit=crop" alt="Tecnología educativa" class="carousel-img">
+                    <div class="carousel-title">Tecnología Educativa de Vanguardia</div>
+                    <div class="carousel-desc">Accede desde cualquier dispositivo y mantente siempre conectado a tu aprendizaje.</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=1200&h=450&fit=crop" alt="Conecta tu comunidad" class="carousel-img">
+                    <div class="carousel-title">Conecta tu Comunidad</div>
+                    <div class="carousel-desc">Facilita la comunicación entre profesores, estudiantes y padres con notificaciones y mensajes instantáneos.</div>
+                </div>
+                <div class="carousel-slide">
+                    <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&h=450&fit=crop" alt="Soporte y acompañamiento" class="carousel-img">
+                    <div class="carousel-title">Soporte y Acompañamiento</div>
+                    <div class="carousel-desc">Recibe ayuda y capacitación personalizada para sacar el máximo provecho de QNote.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer role="contentinfo">
+        <p>&copy; 2025 QNote. Todos los derechos reservados.</p>
+    </footer>
+
+<script>
+let idx = 0;
+const slides = document.querySelectorAll('.carousel-slide');
+function showSlide(i) {
+  slides.forEach((s, j) => s.classList.toggle('active', i === j));
+}
+function nextSlide() {
+  idx = (idx + 1) % slides.length;
+  showSlide(idx);
+}
+setInterval(nextSlide, 5000);
+window.onload = () => showSlide(0);
+</script>
+</body>
+</html>

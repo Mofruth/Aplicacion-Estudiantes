@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Nota</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profesor.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="main-layout">
+        <!-- Sidebar Persistente -->
+        <aside class="sidebar">
+            <div class="logo"><i class="fas fa-chalkboard-teacher"></i> Profesor</div>
+            <nav>
+                <a href="{{ url_for('profesor_dashboard') }}" class="{% if 'dashboard' in request.path %}active{% endif %}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="/profesor/obtener_estudiantes" class="{% if 'obtener_estudiantes' in request.path %}active{% endif %}">
+                    <i class="fas fa-users"></i> Obtener Estudiantes
+                </a>
+                <a href="/profesor/asignar_nota" class="{% if 'asignar_nota' in request.path %}active{% endif %}">
+                    <i class="fas fa-edit"></i> Asignar Nota
+                </a>
+                <a href="/profesor/cambiar_nota" class="{% if 'cambiar_nota' in request.path %}active{% endif %}">
+                    <i class="fas fa-sync-alt"></i> Cambiar Nota
+                </a>
+                <a href="/profesor/enviar_notificacion" class="{% if 'enviar_notificacion' in request.path %}active{% endif %}">
+                    <i class="fas fa-envelope"></i> Notificar
+                </a>
+            </nav>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="container">
+                <h1>Asignar Nota</h1>
+                
+                <!-- Formulario 1: Seleccionar Materia -->
+                <form method="POST" action="{{ url_for('asignar_nota') }}" id="formSeleccionMateria">
+                    <label for="id_materia">Selecciona una materia:</label>
+                    <select name="id_materia" id="id_materia" required>
+                        <option value="">Seleccione una materia</option>
+                        {% for materia in materias %}
+                          <option value="{{ materia.id }}" {% if id_materia == materia.id|string %}selected{% endif %}>
+                            {{ materia.nombre }}
+                          </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Buscar Estudiantes</button>
+                </form>
+
+                <!-- Formulario 2: Asignar Notas (aparece después de seleccionar materia) -->
+                {% if estudiantes %}
+                <form method="POST" action="{{ url_for('asignar_nota') }}" id="formAsignarNotas">
+                    <input type="hidden" name="id_materia" value="{{ request.form.get('id_materia') }}">
+                    
+                    <!-- Selector de Tipo de Evaluación -->
+                    <div style="background: #f0f7ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #4361ee;">
+                        <label for="tipo_evaluacion" style="font-weight: bold; margin-bottom: 0.8rem;">Tipo de Evaluación:</label>
+                        <select name="tipo_evaluacion" id="tipo_evaluacion" required>
+                            <option value="" disabled selected>-- Selecciona el tipo de evaluación --</option>
+                            <option value="Parcial 1">Parcial 1</option>
+                            <option value="Parcial 2">Parcial 2</option>
+                            <option value="Parcial 3">Parcial 3</option>
+                            <option value="Quiz">Quiz</option>
+                            <option value="Tarea">Tarea</option>
+                            <option value="Proyecto">Proyecto</option>
+                            <option value="Participación">Participación</option>
+                            <option value="Examen Final">Examen Final</option>
+                        </select>
+                    </div>
+
+                    <!-- Tabla de Estudiantes -->
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del Estudiante</th>
+                                <th>Correo</th>
+                                <th>Nota (0-5)</th>
+                                <th>Comentario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for estudiante in estudiantes %}
+                            <tr>
+                                <td>{{ estudiante['estudiante'] }}</td>
+                                <td>{{ estudiante['correo'] }}</td>
+                                <td>
+                                    <input class="nota-input" type="number" name="nota[]" min="0" max="5" step="0.1" required placeholder="0.0">
+                                </td>
+                                <td>
+                                    <textarea class="comentario-textarea" name="comentario[]" rows="2" placeholder="Comentario..."></textarea>
+                                </td>
+                                <input type="hidden" name="id_estudiante[]" value="{{ estudiante['id'] }}">
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit">Asignar Nota</button>
+                </form>
+                {% endif %}
+
+                <!-- Botón de regresar -->
+                <a href="{{ url_for('profesor_dashboard') }}" style="text-decoration: none;">
+                    <button type="button" class="btn-back">Volver</button>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tipoEvaluacionSelect = document.getElementById('tipo_evaluacion');
+            const formAsignarNotas = document.getElementById('formAsignarNotas');
+
+            // Recordar la selección de tipo de evaluación
+            if (tipoEvaluacionSelect) {
+                // Cargar valor guardado en localStorage si existe
+                const tipoGuardado = localStorage.getItem('tipoEvaluacionSeleccionado');
+                if (tipoGuardado) {
+                    tipoEvaluacionSelect.value = tipoGuardado;
+                }
+
+                // Guardar selección cuando cambia
+                tipoEvaluacionSelect.addEventListener('change', function() {
+                    localStorage.setItem('tipoEvaluacionSeleccionado', this.value);
+                });
+            }
+
+            // Validación antes de enviar
+            if (formAsignarNotas) {
+                formAsignarNotas.addEventListener('submit', function(e) {
+                    if (!tipoEvaluacionSelect.value) {
+                        e.preventDefault();
+                        alert('Por favor, selecciona un tipo de evaluación');
+                        tipoEvaluacionSelect.focus();
+                        return false;
+                    }
+
+                    // Validar que al menos una nota esté completa
+                    const notasInputs = document.querySelectorAll('.nota-input');
+                    let tieneAlgunaNota = false;
+                    notasInputs.forEach(input => {
+                        if (input.value && parseFloat(input.value) >= 0) {
+                            tieneAlgunaNota = true;
+                        }
+                    });
+
+                    if (!tieneAlgunaNota) {
+                        e.preventDefault();
+                        alert('Por favor, ingresa al menos una nota');
+                        return false;
+                    }
+                });
+            }
+        });
+    </script>
+
+    {% extends 'base_form.html' %}
+    {% block title %}Asignar notas{% endblock %}
+
+    {% block content %}
+    <div class="card">
+      <div class="card-header">
+        <h3>Asignar notas</h3>
+        <p class="small text-muted">Selecciona materia / evaluación y asigna la nota a cada estudiante.</p>
+      </div>
+      <div class="card-body">
+        <form id="filtrosForm" method="get" action="{{ url_for('asignar_nota') }}">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label">Materia</label>
+              <select name="materia_id" class="form-select">
+                <option value="">-- Todas --</option>
+                {% for mat in materias %}
+                  <option value="{{ mat.id }}" {% if request.args.get('materia_id')==mat.id|string %}selected{% endif %}>{{ mat.nombre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Evaluación</label>
+              <select name="evaluacion" class="form-select">
+                <option value="">-- Todas --</option>
+                {% for e in evaluaciones %}
+                  <option value="{{ e }}" {% if request.args.get('evaluacion')==e %}selected{% endif %}>{{ e }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+            </div>
+          </div>
+        </form>
+        <hr>
+        {% if estudiantes %}
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr>
+                <th>#</th><th>Estudiante</th><th>Documento</th><th>Evaluación</th><th>Nota</th><th class="text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for est in estudiantes %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ est.nombre_completo }}</td>
+                <td>{{ est.documento }}</td>
+                <td>
+                  <form class="notaForm prevent-double d-flex gap-2" method="post" action="{{ url_for('asignar_nota') }}">
+                    <input type="hidden" name="student_id" value="{{ est.id }}">
+                    <input type="hidden" name="materia_id" value="{{ selected_materia or '' }}">
+                    <select name="evaluacion" class="form-select form-select-sm" required>
+                      <option value="">Selecciona</option>
+                      {% for e in evaluaciones %}<option value="{{ e }}">{{ e }}</option>{% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input name="nota" type="number" step="0.1" min="0" max="100" class="form-control form-control-sm" placeholder="0-100" required>
+                </td>
+                <td class="text-end">
+                    <button type="submit" class="btn btn-sm btn-primary submit-nota"><i class="fa fa-save"></i> Guardar</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <div class="alert alert-info">No hay estudiantes para mostrar con los filtros seleccionados.</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endblock %}
+
+    {% block extra_scripts %}
+    <script>
+      $(function(){
+        $('.notaForm').on('submit', function(e){
+          const btn = $(this).find('button[type=submit]');
+          if (btn.data('submitting')) {
+            e.preventDefault();
+            return false;
+          }
+          btn.data('submitting', true).addClass('disabled');
+          btn.html('<i class="fa fa-spinner fa-spin"></i> Guardando');
+          return true;
+        });
+      });
+    </script>
+    {% endblock %}
+</body>
+</html>

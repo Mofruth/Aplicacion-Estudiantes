@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Horario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f5f7;
+        }
+
+        .sidebar {
+            width: 275px;
+            background-color: #2d3142;
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4facfe;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar-item {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #b8bcc8;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .sidebar-link:hover {
+            background-color: #3d4157;
+            color: white;
+        }
+
+        .sidebar-link.active {
+            background-color: #4facfe;
+            color: white;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            font-size: 32px;
+            font-weight: 700;
+            color: #4facfe;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .view-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .view-btn.active {
+            background: #4facfe;
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .view-btn:hover {
+            border-color: #4facfe;
+            color: #4facfe;
+        }
+
+        .schedule-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        /* Weekly View */
+        .weekly-schedule {
+            display: grid;
+            grid-template-columns: 60px repeat(5, 1fr);
+            border: 1px solid #e0e0e0;
+        }
+
+        .time-cell {
+            padding: 15px 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .day-header {
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 700;
+            color: #2d3142;
+            background: #f0f2f5;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .schedule-cell {
+            padding: 10px;
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .class-slot {
+            background: linear-gradient(135deg, #4facfe 0%, #2ea2ff 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .class-slot:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(79,172,254,0.3);
+        }
+
+        .class-name {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .class-time {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        /* List View */
+        .schedule-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .schedule-day {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .schedule-day:last-child {
+            border-bottom: none;
+        }
+
+        .day-title {
+            font-weight: 700;
+            color: #2d3142;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .day-classes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .schedule-card {
+            background: linear-gradient(135deg, #4facfe 0%, #2ea2ff 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .schedule-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+        }
+
+        .schedule-card-time {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .schedule-card-class {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .schedule-card-teacher {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #4facfe 0%, #2ea2ff 100%);
+        }
+
+        .no-schedule {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-schedule svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Crear Evento */
+        .create-event-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #2ea2ff 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .create-event-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+        }
+
+        /* Modal para crear evento */
+        .event-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .event-modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .event-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .event-modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3142;
+        }
+
+        .event-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .event-modal-close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2d3142;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .event-modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn-cancel,
+        .btn-save {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #4facfe 0%, #2ea2ff 100%);
+            color: white;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+        }
+
+        /* Eventos personalizados en el horario */
+        .custom-event {
+            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+            font-size: 11px;
+            padding: 6px;
+            margin: 2px 0;
+            border-radius: 4px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .custom-event:hover {
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 1200px) {
+            .weekly-schedule {
+                grid-template-columns: 50px repeat(3, 1fr);
+            }
+
+            .day-classes {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .weekly-schedule {
+                grid-template-columns: 40px repeat(2, 1fr);
+            }
+
+            .schedule-cell {
+                min-height: 60px;
+            }
+
+            .class-slot {
+                font-size: 11px;
+                padding: 8px;
+            }
+
+            .legend {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    {% set active_page = 'horario' %}
+    {% include 'estudiante/_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="page-header">Mi Horario</h1>
+
+        <div class="layout" style="display:flex; gap:24px; align-items:flex-start;">
+            <div class="schedule-wrapper" style="flex:1;">
+                <!-- View Selector -->
+                <div class="view-selector">
+                    <button class="view-btn active" id="btnSemanal">Vista Semanal</button>
+                    <button class="view-btn" id="btnDia">Vista por Día</button>
+                    <button class="create-event-btn" id="btnCrearEvento">
+                        <i class="fas fa-plus" style="margin-right:8px;"></i> Crear Evento
+                    </button>
+                </div>
+
+                <!-- Weekly View -->
+                <div id="weeklyView" class="schedule-container">
+                    <div class="weekly-schedule">
+                        <div class="time-cell">Hora</div>
+                        <div class="day-header">Lunes</div>
+                        <div class="day-header">Martes</div>
+                        <div class="day-header">Miércoles</div>
+                        <div class="day-header">Jueves</div>
+                        <div class="day-header">Viernes</div>
+
+                        {% for hora in ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00'] %}
+                        <div class="time-cell">{{ hora }}</div>
+                        {% for dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] %}
+                        <div class="schedule-cell" data-dia="{{ dia }}" data-hora="{{ hora }}">
+                            {% for clase in horario %}
+                                {% if clase.dia_semana == dia and clase.hora_inicio == hora %}
+                                <div class="class-slot">
+                                    <div class="class-name">{{ clase.materia }}</div>
+                                    <div class="class-time">{{ clase.hora_inicio }} - {{ clase.hora_fin }}</div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- List View (hidden by default) -->
+                <div id="listView" class="schedule-container" style="display:none;">
+                    <div class="schedule-list">
+                        {% set dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] %}
+                        {% for dia in dias %}
+                            {% set clases_dia = horario|selectattr('dia_semana', 'equalto', dia)|list %}
+                            <div class="schedule-day">
+                                <div class="day-title">📅 {{ dia }}</div>
+                                <div class="day-classes">
+                                    {% if clases_dia %}
+                                        {% for clase in clases_dia %}
+                                        <div class="schedule-card">
+                                            <div class="schedule-card-time">🕐 {{ clase.hora_inicio }} - {{ clase.hora_fin }}</div>
+                                            <div class="schedule-card-class">{{ clase.materia }}</div>
+                                            <div class="schedule-card-teacher">👨‍🏫 Prof. {{ clase.profesor if clase.profesor else 'No asignado' }}</div>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div style="color:#999; padding:8px;">No hay clases registradas</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color"></div>
+                        <span>Clases programadas</span>
+                    </div>
+                    <div class="legend-item">
+                        📅 Horario académico de lunes a viernes
+                    </div>
+                    <div class="legend-item">
+                        👨‍🏫 Instructores asignados
+                    </div>
+                </div>
+
+                {% if not horario %}
+                <div class="no-schedule">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"/>
+                    </svg>
+                    <h3>No tienes horario asignado</h3>
+                    <p>Cuando el administrador asigne tu horario de clases, aparecerá aquí.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <aside class="right-panel" style="width:320px;">
+                <div style="background:white; border-radius:12px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                    <h3 style="margin-bottom:12px; color:#2d3142;">Materias disponibles</h3>
+                    <p style="font-size:13px; color:#666; margin-bottom:12px;">Selecciona una materia para solicitar inscripción. El administrador deberá aprobarla.</p>
+                    {% if materias %}
+                        <div style="display:flex; flex-direction:column; gap:10px; max-height:420px; overflow:auto;">
+                        {% for m in materias %}
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px; border:1px solid #f0f0f0; border-radius:8px;">
+                                <div style="font-weight:600; color:#333;">{{ m.nombre }}</div>
+                                <form method="POST" action="{{ url_for('inscribir_materia') }}">
+                                    <input type="hidden" name="id_materia" value="{{ m.id }}">
+                                    {% if usuario.puede_inscribirse %}
+                                        <button type="submit" style="background:#4facfe; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">Inscribirse</button>
+                                    {% else %}
+                                        <button type="button" disabled style="background:#ddd; color:#666; border:none; padding:8px 12px; border-radius:6px;">No autorizado</button>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="color:#999;">No hay materias disponibles.</p>
+                    {% endif %}
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar evento -->
+    <div id="eventModal" class="event-modal">
+        <div class="event-modal-content">
+            <div class="event-modal-header">
+                <h2 class="event-modal-title">Crear Evento</h2>
+                <button class="event-modal-close" id="closeEventModal">&times;</button>
+            </div>
+            
+            <form id="eventForm">
+                <div class="form-group">
+                    <label for="eventTitulo">Título del evento *</label>
+                    <input type="text" id="eventTitulo" name="titulo" placeholder="Ej: Entregar proyecto" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventDescripcion">Descripción</label>
+                    <textarea id="eventDescripcion" name="descripcion" placeholder="Agrega detalles sobre el evento..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="eventFecha">Fecha *</label>
+                    <input type="date" id="eventFecha" name="fecha" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Hora *</label>
+                    <div class="time-inputs">
+                        <div>
+                            <label for="eventHoraInicio" style="font-size:12px;">Inicio</label>
+                            <input type="time" id="eventHoraInicio" name="hora_inicio" required>
+                        </div>
+                        <div>
+                            <label for="eventHoraFin" style="font-size:12px;">Fin</label>
+                            <input type="time" id="eventHoraFin" name="hora_fin" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Color del evento</label>
+                    <div class="color-picker">
+                        <div class="color-option selected" data-color="#4facfe" style="background:#4facfe;"></div>
+                        <div class="color-option" data-color="#ff6b6b" style="background:#ff6b6b;"></div>
+                        <div class="color-option" data-color="#51cf66" style="background:#51cf66;"></div>
+                        <div class="color-option" data-color="#ffa94d" style="background:#ffa94d;"></div>
+                        <div class="color-option" data-color="#9775fa" style="background:#9775fa;"></div>
+                        <div class="color-option" data-color="#20c997" style="background:#20c997;"></div>
+                    </div>
+                    <input type="hidden" id="eventColor" name="color" value="#4facfe">
+                </div>
+
+                <div class="event-modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelEventBtn">Cancelar</button>
+                    <button type="submit" class="btn-save" id="saveEventBtn">
+                        <i class="fas fa-save" style="margin-right:6px;"></i> Guardar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        let editingEventId = null;
+        let eventoActualColor = '#4facfe';
+
+        // Vista del horario
+        function showWeekly() {
+            document.getElementById('weeklyView').style.display = 'grid';
+            document.getElementById('listView').style.display = 'none';
+            document.getElementById('btnSemanal').classList.add('active');
+            document.getElementById('btnDia').classList.remove('active');
+        }
+
+        function showList() {
+            document.getElementById('weeklyView').style.display = 'none';
+            document.getElementById('listView').style.display = 'block';
+            document.getElementById('btnSemanal').classList.remove('active');
+            document.getElementById('btnDia').classList.add('active');
+        }
+
+        // Modal de eventos
+        const modal = document.getElementById('eventModal');
+        const form = document.getElementById('eventForm');
+        const btnCrear = document.getElementById('btnCrearEvento');
+        const btnCerrar = document.getElementById('closeEventModal');
+        const btnCancelar = document.getElementById('cancelEventBtn');
+
+        // Abrir modal para crear evento
+        btnCrear.addEventListener('click', function() {
+            editingEventId = null;
+            form.reset();
+            document.querySelector('.event-modal-title').textContent = 'Crear Evento';
+            document.getElementById('eventColor').value = '#4facfe';
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector('[data-color="#4facfe"]').classList.add('selected');
+            modal.style.display = 'block';
+        });
+
+        // Cerrar modal
+        function cerrarModal() {
+            modal.style.display = 'none';
+            form.reset();
+            editingEventId = null;
+        }
+
+        btnCerrar.addEventListener('click', cerrarModal);
+        btnCancelar.addEventListener('click', cerrarModal);
+
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModal();
+            }
+        });
+
+        // Selector de colores
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('eventColor').value = this.dataset.color;
+                eventoActualColor = this.dataset.color;
+            });
+        });
+
+        // Guardar evento
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const titulo = document.getElementById('eventTitulo').value;
+            const descripcion = document.getElementById('eventDescripcion').value;
+            const fecha = document.getElementById('eventFecha').value;
+            const horaInicio = document.getElementById('eventHoraInicio').value;
+            const horaFin = document.getElementById('eventHoraFin').value;
+            const color = document.getElementById('eventColor').value;
+
+            if (!titulo || !fecha || !horaInicio || !horaFin) {
+                alert('Por favor completa todos los campos requeridos');
+                return;
+            }
+
+            if (horaInicio >= horaFin) {
+                alert('La hora de inicio debe ser anterior a la hora de fin');
+                return;
+            }
+
+            const datos = {
+                titulo: titulo,
+                descripcion: descripcion,
+                fecha: fecha,
+                hora_inicio: horaInicio,
+                hora_fin: horaFin,
+                color: color
+            };
+
+            const url = editingEventId 
+                ? `/api/eventos/actualizar/${editingEventId}`
+                : '/api/eventos/crear';
+
+            const method = editingEventId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(editingEventId ? 'Evento actualizado' : 'Evento creado exitosamente');
+                    cerrarModal();
+                    cargarEventos();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al guardar el evento');
+            });
+        });
+
+        // Cargar y mostrar eventos
+        function cargarEventos() {
+            fetch('/api/eventos/obtener')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarEventosEnCalendario(data.eventos);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function mostrarEventosEnCalendario(eventos) {
+            // Limpiar eventos previos (tanto en lista como en grid semanal)
+            document.querySelectorAll('.custom-event').forEach(e => e.remove());
+
+            // Mapar eventos a la vista semanal y a la vista por día
+            eventos.forEach(evento => {
+                const fecha = new Date(evento.fecha);
+                const diaSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][fecha.getDay()];
+                const horaInicio = evento.hora_inicio ? evento.hora_inicio.substring(0,5) : '';
+                const horaFin = evento.hora_fin ? evento.hora_fin.substring(0,5) : '';
+
+                // 1) Intentar agregar en la celda semanal correspondiente (data-dia + data-hora)
+                let targetCell = document.querySelector(`.schedule-cell[data-dia="${diaSemana}"][data-hora="${horaInicio}"]`);
+                if (!targetCell) {
+                    // Si no existe una celda exacta, añadir al primer hueco del día
+                    targetCell = document.querySelector(`.schedule-cell[data-dia="${diaSemana}"]`);
+                }
+
+                if (targetCell) {
+                    const badge = document.createElement('div');
+                    badge.className = 'custom-event';
+                    badge.style.background = evento.color || '#ffa726';
+                    badge.style.color = '#fff';
+                    badge.style.padding = '6px';
+                    badge.style.margin = '4px 0';
+                    badge.style.borderRadius = '6px';
+                    badge.style.fontSize = '11px';
+                    badge.innerHTML = `
+                        <div class="class-name" style="font-weight:700;">${evento.titulo}</div>
+                        <div class="class-time" style="font-size:11px; opacity:0.95;">${horaInicio} - ${horaFin}</div>
+                        <div style="margin-top:6px; display:flex; gap:6px;">
+                            <button type="button" onclick="editarEvento(${evento.id})" style="flex:1; padding:4px; background:rgba(255,255,255,0.15); border:none; color:#fff; border-radius:4px; cursor:pointer; font-size:11px;">Editar</button>
+                            <button type="button" onclick="eliminarEvento(${evento.id})" style="flex:1; padding:4px; background:rgba(255,255,255,0.15); border:none; color:#fff; border-radius:4px; cursor:pointer; font-size:11px;">Eliminar</button>
+                        </div>
+                    `;
+                    targetCell.appendChild(badge);
+                }
+
+                // 2) Agregar también en la vista por día (lista)
+                const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+                dias.forEach((dia, idx) => {
+                    if (diaSemana === dia) {
+                        const daysContainers = document.querySelectorAll('.day-classes');
+                        if (daysContainers[idx]) {
+                            const eventoDiv = document.createElement('div');
+                            eventoDiv.className = 'schedule-card custom-event';
+                            eventoDiv.style.background = evento.color || '#4facfe';
+                            eventoDiv.innerHTML = `
+                                <div class="schedule-card-time">🕐 ${horaInicio} - ${horaFin}</div>
+                                <div class="schedule-card-class">${evento.titulo}</div>
+                                <div class="schedule-card-teacher">${evento.descripcion || 'Evento personal'}</div>
+                                <div style="margin-top:8px; display:flex; gap:6px;">
+                                    <button type="button" onclick="editarEvento(${evento.id})" style="flex:1; padding:6px; background:rgba(255,255,255,0.3); border:none; color:white; border-radius:4px; cursor:pointer; font-size:11px;">Editar</button>
+                                    <button type="button" onclick="eliminarEvento(${evento.id})" style="flex:1; padding:6px; background:rgba(255,255,255,0.3); border:none; color:white; border-radius:4px; cursor:pointer; font-size:11px;">Eliminar</button>
+                                </div>
+                            `;
+                            daysContainers[idx].appendChild(eventoDiv);
+                        }
+                    }
+                });
+            });
+        }
+
+        function editarEvento(eventoId) {
+            fetch(`/api/eventos/obtener/${eventoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const evento = data.evento;
+                        editingEventId = eventoId;
+                        
+                        document.getElementById('eventTitulo').value = evento.titulo;
+                        document.getElementById('eventDescripcion').value = evento.descripcion || '';
+                        document.getElementById('eventFecha').value = evento.fecha;
+                        document.getElementById('eventHoraInicio').value = evento.hora_inicio;
+                        document.getElementById('eventHoraFin').value = evento.hora_fin;
+                        document.getElementById('eventColor').value = evento.color;
+                        
+                        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                        document.querySelector(`[data-color="${evento.color}"]`).classList.add('selected');
+                        
+                        document.querySelector('.event-modal-title').textContent = 'Editar Evento';
+                        modal.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function eliminarEvento(eventoId) {
+            if (confirm('¿Estás seguro de que deseas eliminar este evento?')) {
+                fetch(`/api/eventos/eliminar/${eventoId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Evento eliminado');
+                        cargarEventos();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // Event listeners para botones
+        document.addEventListener('DOMContentLoaded', function() {
+            // Botones de vista
+            document.getElementById('btnSemanal').addEventListener('click', showWeekly);
+            document.getElementById('btnDia').addEventListener('click', showList);
+
+            // Cargar eventos al iniciar
+            cargarEventos();
+
+            // Establecer fecha mínima en el input de fecha al crear evento
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('eventFecha').setAttribute('min', hoy);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Estudiante</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f5f7;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 275px;
+            background-color: #2d3142;
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4facfe;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar-item {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #b8bcc8;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .sidebar-link:hover {
+            background-color: #3d4157;
+            color: white;
+        }
+
+        .sidebar-link.active {
+            background-color: #4facfe;
+            color: white;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+        }
+
+        .welcome-header {
+            font-size: 32px;
+            font-weight: 700;
+            color: #4facfe;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .stat-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3142;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #4facfe;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3142;
+            margin-bottom: 20px;
+        }
+
+        /* Progress Chart */
+        .progress-chart {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s;
+            fill: none;
+            stroke-width: 20;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: 700;
+            color: #4facfe;
+        }
+
+        .progress-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        /* Line Chart */
+        .line-chart {
+            height: 250px;
+            position: relative;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    {% set active_page = 'dashboard' %}
+    {% include 'estudiante/_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="welcome-header">Bienvenido, {{ usuario.nombre }}</h1>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total de Tareas por Entregar</h3>
+                <div class="stat-value">{{ estadisticas | length if estadisticas else 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Asistencia</h3>
+                <div class="stat-value">{{ asistencia if asistencia else 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Materias Inscritas</h3>
+                <div class="stat-value">{{ materias | length if materias else 0 }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Promedio General</h3>
+                <div class="stat-value">{{ promedio_general if promedio_general else 0 }}</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <!-- Progress Chart -->
+            <div class="chart-container">
+                <h3 class="chart-title">Rendimiento por Materia</h3>
+                {% if estadisticas %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                        <thead>
+                                <tr style="border-bottom: 2px solid #4facfe;">
+                                <th style="padding: 10px;">Materia</th>
+                                <th style="padding: 10px;">Promedio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in estadisticas %}
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">{{ stat.materia }}</td>
+                                <td style="padding: 10px; color: #4facfe; font-weight: 600;">
+                                    {{ stat.promedio if stat.promedio else 'Sin calificaciones' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: #999; padding: 20px;">No hay materias inscritas aún</p>
+                {% endif %}
+            </div>
+
+            <!-- Line Chart -->
+            <div class="chart-container">
+                <h3 class="chart-title">Últimas Notificaciones</h3>
+                {% if notificaciones %}
+                <div style="max-height: 250px; overflow-y: auto;">
+                    {% for notif in notificaciones | slice(5) %}
+                    <div style="padding: 12px; border-bottom: 1px solid #e0e0e0; margin-bottom: 8px;">
+                        <p style="font-weight: 600; margin: 0 0 5px 0; color: #2d3142;">{{ notif.titulo }}</p>
+                        <p style="margin: 0; color: #666; font-size: 13px;">{{ notif.mensaje }}</p>
+                        <p style="margin: 5px 0 0 0; color: #999; font-size: 12px;">{{ notif.fecha }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="text-align: center; color: #999; padding: 20px;">No hay notificaciones</p>
+                {% endif %}
+            </div>
+        </div>
+
+
+    <script>
+        // Interactividad general del sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+
+        // Actualizar datos cada 5 minutos
+        setInterval(function() {
+            location.reload();
+        }, 300000);
+    </script>
+</body>
+</html>
