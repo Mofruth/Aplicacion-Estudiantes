@@ -1,28 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Formulario{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Campus{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  {% block extra_head %}{% endblock %}
+  <style>
+    .btn { min-width: 110px; }
+    .layout-container { max-width:1200px; margin: 0 auto; padding: 1rem; }
+    .page-header { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
+    .card { background:#fff; border:1px solid #e6e6e6; border-radius:6px; padding:1rem; box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="auth-card">
-            <h1>{% block header %}Formulario{% endblock %}</h1>
-            
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="alert">
-                        {% for category, message in messages %}
-                            <p class="{{ category }}">{{ message }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
-            
-            {% block content %}{% endblock %}
-        </div>
+  <header class="page-header layout-container">
+    <div class="branding">
+      <a href="{{ url_for('home') }}"><strong>Campus</strong> · Gestión</a>
     </div>
+    <nav class="nav-right">
+      {% if session.get('user_id') %}
+        <span class="user-info">Hola, {{ session.get('user_name') }}</span>
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('logout') }}">Salir</a>
+      {% else %}
+        <a class="btn btn-sm btn-primary" href="{{ url_for('login') }}">Iniciar sesión</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main class="layout-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category=='error' else category }} alert-dismissible" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="layout-container" style="margin-top:2rem; padding:1rem 0; color:#666; border-top:1px solid #eee;">
+    <small>Campus · Sistema de gestión estudiantil — &copy; {{ current_year if current_year else '2025' }}</small>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

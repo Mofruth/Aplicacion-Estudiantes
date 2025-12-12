@@ -48,7 +48,7 @@
 
         form{display:flex;flex-direction:column;gap:12px}
         label{font-size:13px;color:#444}
-        input, select{padding:12px;border:1px solid #e6e6e6;border-radius:8px;font-size:14px}
+        input {padding:12px;border:1px solid #e6e6e6;border-radius:8px;font-size:14px}
 
         .actions{display:flex;flex-direction:column;gap:12px;margin-top:8px}
         .primary-btn{background:var(--primary);color:#fff;padding:12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
@@ -72,30 +72,20 @@
             <div class="brand">
                 <div class="brand-logo"></div>
                 <div>
-                    <div style="font-size:12px;color:#888">EBOOK STUDY</div>
+                    <div style="font-size:12px;color:#888">QNote</div>
                     <div style="font-size:12px;color:#aaa">Bienvenido de vuelta</div>
                 </div>
             </div>
             <div class="title">Bienvenido de vuelta querido usuario</div>
 
             <form method="POST" action="{{ url_for('login') }}">
-                <label for="correo">Email:</label>
-                <input type="email" name="correo" id="correo" placeholder="Ingresa tu Email" required>
+                <label for="correo">Correo electrónico</label>
+                <input type="email" name="correo" id="correo" required autocomplete="email">
 
-                <label for="contraseña">Contraseña:</label>
-                <input type="password" name="contraseña" id="contraseña" placeholder="Ingrese su contraseña" required>
+                <label for="contraseña">Contraseña</label>
+                <input type="password" name="contraseña" id="contraseña" required autocomplete="current-password">
 
-                <label for="rol">Iniciar como:</label>
-                <select name="rol" id="rol" required>
-                    <option value="estudiante" selected>Estudiante</option>
-                    <option value="profesor">Profesor</option>
-                    <option value="admin">Administrador</option>
-                    <option value="padre">Acudiente</option>
-                </select>
-
-                <div class="actions">
-                    <button class="primary-btn" type="submit">Iniciar Sesión</button>
-                </div>
+                <button type="submit" class="btn">Iniciar Sesión</button>
             </form>
 
             <div class="secondary">O inicia sesión con</div>
