@@ -583,14 +583,14 @@
                         {% for dia in dias %}
                             {% set clases_dia = horario|selectattr('dia_semana', 'equalto', dia)|list %}
                             <div class="schedule-day">
-                                <div class="day-title">📅 {{ dia }}</div>
+                                <div class="day-title"> {{ dia }}</div>
                                 <div class="day-classes">
                                     {% if clases_dia %}
                                         {% for clase in clases_dia %}
                                         <div class="schedule-card">
-                                            <div class="schedule-card-time">🕐 {{ clase.hora_inicio }} - {{ clase.hora_fin }}</div>
+                                            <div class="schedule-card-time"> {{ clase.hora_inicio }} - {{ clase.hora_fin }}</div>
                                             <div class="schedule-card-class">{{ clase.materia }}</div>
-                                            <div class="schedule-card-teacher">👨‍🏫 Prof. {{ clase.profesor if clase.profesor else 'No asignado' }}</div>
+                                            <div class="schedule-card-teacher"> Prof. {{ clase.profesor if clase.profesor else 'No asignado' }}</div>
                                         </div>
                                         {% endfor %}
                                     {% else %}
