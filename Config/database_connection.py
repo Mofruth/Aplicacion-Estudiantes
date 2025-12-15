@@ -8,7 +8,7 @@ def create_connection():
             host='localhost',
             user='root',  
             password='', 
-            database='GestionDeEstudiantes'  
+            database='gestiondeestudiantes'  
         )
         return connection
     except Error as e:

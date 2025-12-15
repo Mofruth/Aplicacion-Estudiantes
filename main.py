@@ -53,13 +53,14 @@ else:
             client_kwargs={'scope': 'openid email profile'}
         )
 
-        # Configuración de subida de archivos (hojas de vida)
-        ALLOWED_EXTENSIONS = {'pdf'}
-        UPLOAD_FOLDER = os.path.join(app.static_folder, 'uploads', 'hojas')
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-        def allowed_file(filename):
-            return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Configuración de subida de archivos (hojas de vida)
+ALLOWED_EXTENSIONS = {'pdf'}
+UPLOAD_FOLDER = os.path.join(app.static_folder, 'uploads', 'hojas')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_db_connection():
     conn = sqlite3.connect('tu_base_de_datos.db')
@@ -783,7 +784,7 @@ def subir_hoja():
                     conexion.commit()
                 except Exception as e:
                     conexion.rollback()
-                    app.logger.error(f"Error guardando nombre de archivo en BD: {e}")
+                    print(f"Error guardando nombre de archivo en BD: {e}")  # <-- Agrega este print para depuración
                 finally:
                     try:
                         cursor.close()
@@ -796,17 +797,15 @@ def subir_hoja():
 
             flash('Hoja de vida subida correctamente.', 'success')
         except Exception as e:
-            app.logger.error(f"Error al guardar archivo: {e}")
+            print(f"Error al guardar archivo: {e}")  # <-- Agrega este print para depuración
             flash('Ocurrió un error al subir el archivo.', 'error')
     else:
         flash('Tipo de archivo no permitido. Solo PDF.', 'error')
 
     return redirect(url_for('profesor_hoja_vida'))
 
-
 @app.route('/profesor/actualizar_hoja', methods=['POST'])
 def actualizar_hoja():
-    # Reutiliza la lógica de subir_hoja (sobrescribe registro y archivo)
     return subir_hoja()
 
 

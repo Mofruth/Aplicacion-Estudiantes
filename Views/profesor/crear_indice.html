@@ -62,10 +62,10 @@
                     <button type="submit" style="margin-top: 1rem;">{% if indice %}Actualizar{% else %}Crear{% endif %} Índice</button>
                 </form>
 
-                <!-- Botón de regresar -->
-                <a href="{{ url_for('indices') }}" style="text-decoration: none; display: block;">
-                    <button type="button" class="btn-back">Volver</button>
-                </a>
+                <!-- Botón de regresar único y centrado -->
+                <div style="display: flex; justify-content: center; margin-top: 2rem;">
+                    <a href="{{ url_for('indices') }}" class="btn-back">Volver</a>
+                </div>
             </div>
         </main>
     </div>

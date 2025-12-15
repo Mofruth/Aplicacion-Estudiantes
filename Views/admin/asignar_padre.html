@@ -137,9 +137,9 @@
                 <div class="mensaje-error">{{ mensaje_error }}</div>
             {% endif %}
         </form>
-        <a href="{{ url_for('dashboard') }}" class="btn-volver-dashboard">
-            <i class="fas fa-arrow-left"></i> Volver al Dashboard
-        </a>
+        <div style="display: flex; justify-content: center; margin-top: 2rem;">
+            <a href="{{ url_for('dashboard') }}" class="btn-back">Volver al Dashboard</a>
+        </div>
     </div>
 </body>
 </html>

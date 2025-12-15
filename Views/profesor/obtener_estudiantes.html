@@ -42,14 +42,16 @@
                 <form method="POST" action="{{ url_for('obtener_estudiantes') }}">
                     <div class="form-group">
                         <label for="id_materia">Selecciona una materia:</label>
-                        <select name="id_materia" id="id_materia" required>
+                        <select name="id_materia" id="id_materia" required style="padding:8px 12px; border-radius:6px; min-width:fit-content;">
                             <option value="" disabled selected>-- Selecciona una materia --</option>
                             {% for materia in materias %}
                             <option value="{{ materia['id'] }}">{{ materia['nombre'] }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <button type="submit">Buscar</button>
+                    <div style="display:flex; justify-content:center; margin-top:16px;">
+                        <button type="submit" style="padding:12px 28px; border-radius:8px; min-width:fit-content; background:#4facfe; color:white; border:none; width:fit-content; font-size:1.15rem; font-weight:500;">Buscar</button>
+                    </div>
                 </form>
 
                 {% if estudiantes %}
@@ -75,7 +77,9 @@
                 {% endif %}
 
                 <a href="{{ url_for('profesor_dashboard') }}" style="text-decoration: none;">
-                    <button type="button" class="btn-back">Volver al Dashboard</button>
+                    <div style="display:flex; justify-content:center; margin-top:20px;">
+                        <button type="button" class="btn-back" style="padding:12px 28px; border-radius:8px; min-width:fit-content; background:#747d87; color:white; border:none; width:fit-content; font-size:1.15rem; font-weight:500;">Volver al Dashboard</button>
+                    </div>
                 </a>
             </div>
         </main>

@@ -4,27 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horario Asignado</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 2rem;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4361ee;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #4361ee;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .empty {
+            text-align: center;
+            color: #777;
+            margin-top: 1.5rem;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 2rem;
+            background-color: #6c757d;
+            color: #ffffff;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .btn-back:hover {
+            background-color: #5a6268;
+        }
+    </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Horario Asignado</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Materia</th>
-                    <th>Descripción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for materia in materias %}
-                <tr>
-                    <td>{{ materia['nombre'] }}</td>
-                    <td>{{ materia['descripcion'] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="container">
+    <h1>Horario Asignado</h1>
+
+    {% if materias %}
+    <table>
+        <thead>
+            <tr>
+                <th>Materia</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for materia in materias %}
+            <tr>
+                <td>{{ materia.nombre }}</td>
+                <td>{{ materia.descripcion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="empty">No tienes materias asignadas actualmente.</div>
+    {% endif %}
+
+    <div style="display: flex; justify-content: center; margin-top: 2.5rem;">
+        <a href="{{ url_for('estudiante.dashboard') }}" class="btn-back">
+            Volver al menú
+        </a>
     </div>
+</div>
 </body>
 </html>
+ 

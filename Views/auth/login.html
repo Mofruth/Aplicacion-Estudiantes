@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Google font for better typography -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root{--primary:#4361ee;--bg:#f8fafc}
@@ -51,13 +50,11 @@
         input {padding:12px;border:1px solid #e6e6e6;border-radius:8px;font-size:14px}
 
         .actions{display:flex;flex-direction:column;gap:12px;margin-top:8px}
-        .primary-btn{background:var(--primary);color:#fff;padding:12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+        /* Clase del botón corregida para que coincida con el uso en el form (btn o primary-btn) */
+        .btn {background:var(--primary);color:#fff;padding:12px;border-radius:8px;border:none;cursor:pointer;font-weight:600; font-size: 14px;}
+        .btn:hover {background-color: #3b5bdb;}
 
-        .social-row{display:flex;flex-direction:column;gap:10px;margin-top:10px}
-        .social-btn{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;border:1px solid #e6e6e6;background:#fff;cursor:pointer;text-decoration:none;color:inherit}
-        .google-icon{width:20px;height:20px}
-
-        .secondary {text-align:center;margin-top:10px;font-size:13px}
+        .secondary {text-align:center;margin-top:20px;font-size:13px}
 
         @media (max-width:1000px){
             .page{grid-template-columns:1fr}
@@ -87,14 +84,6 @@
 
                 <button type="submit" class="btn">Iniciar Sesión</button>
             </form>
-
-            <div class="secondary">O inicia sesión con</div>
-            <div class="social-row">
-                <a class="social-btn" href="{{ url_for('login_google') }}">
-                    <img class="google-icon" src="https://www.svgrepo.com/show/355037/google.svg" alt="Google">
-                    Iniciar sesión con Google
-                </a>
-            </div>
 
             <div class="secondary">¿Todavía no tienes una cuenta? <a href="{{ url_for('register') }}">Crea una Ahora</a></div>
         </div>

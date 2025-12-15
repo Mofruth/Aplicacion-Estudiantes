@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS profesores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(100) UNIQUE NOT NULL,
-    contraseña VARCHAR(255) NOT NULL
+    contraseña VARCHAR(255) NOT NULL,
+    hoja_vida VARCHAR(255)
 );
 
 -- Tabla de estudiantes (modificada con puede_inscribirse)

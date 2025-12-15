@@ -29,7 +29,7 @@
             display: block;
             color: #22223b;
         }
-        select, button, input[type="text"] {
+        select, input[type="text"] {
             width: 100%;
             padding: 0.7rem;
             margin-top: 0.5rem;
@@ -38,6 +38,21 @@
             border: 1px solid #e0e1dd;
             font-size: 1rem;
             box-sizing: border-box;
+        }
+        button {
+            display: inline-block;
+            width: fit-content;
+            min-width: 120px;
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background: #4361ee;
+            border: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+            cursor: pointer;
+            margin-bottom: 1.2rem;
         }
         button {
             background: #4361ee;
@@ -76,13 +91,15 @@
             background: #dc3545;
             color: #fff;
             border: none;
-            border-radius: 6px;
-            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
             margin: 0 2px;
             cursor: pointer;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: bold;
             transition: background 0.2s;
+            width: fit-content;
+            min-width: 100px;
         }
         .acciones-btn:hover {
             background: #b02a37;
@@ -91,13 +108,15 @@
             background: #f8961e;
             color: #fff;
             border: none;
-            border-radius: 6px;
-            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
             margin: 0 2px;
             cursor: pointer;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: bold;
             transition: background 0.2s;
+            width: fit-content;
+            min-width: 100px;
         }
         .modificar-btn:hover {
             background: #d68c1b;
@@ -106,13 +125,15 @@
             background: #4361ee;
             color: #fff;
             border: none;
-            border-radius: 6px;
-            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
             margin: 0 2px;
             cursor: pointer;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: bold;
             transition: background 0.2s;
+            width: fit-content;
+            min-width: 100px;
         }
         .guardar-btn:hover {
             background: #3a56d4;
@@ -124,21 +145,22 @@
             font-size: 1.3rem;
         }
         .volver-btn {
-            display: inline-block;
-            margin-top: 2.5rem;
-            background: #6c757d;
-            color: #fff;
+            display: block;
+            width: fit-content;
+            margin: 2rem auto 0;
+            font-size: 1rem;
             font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            padding: 0.8rem 2.5rem;
-            font-size: 1.1rem;
+            color: #ffffff;
+            background-color: #6c757d;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
             text-decoration: none;
-            transition: background 0.2s;
-            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s;
+            border: none;
         }
         .volver-btn:hover {
-            background: #5a6268;
+            background-color: #5a6268;
         }
         .volver-btn::before {
             content: "← ";
@@ -197,7 +219,7 @@
                 {% endfor %}
             </select>
             
-            <button type="submit">Agregar Inscripción</button>
+            <button type="submit" style="margin-left:auto;margin-right:auto;display:block;">Agregar Inscripción</button>
         </form>
 
         <div class="section-title">Inscripciones actuales</div>

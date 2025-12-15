@@ -33,8 +33,10 @@
                 <option value="padre" {% if usuario.rol == 'padre' %}selected{% endif %}>Padre</option>
             </select>
 
-            <button type="submit">Guardar Cambios</button>
-            <a href="{{ url_for('gestionar_usuarios') }}" class="btn-back">Cancelar</a>
+            <div style="display: flex; justify-content: center; gap: 1.2rem; margin-top: 2rem;">
+                <button type="submit">Guardar Cambios</button>
+                <a href="{{ url_for('gestionar_usuarios') }}" class="btn-back">Cancelar</a>
+            </div>
         </form>
     </div>
 </body>

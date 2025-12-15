@@ -38,15 +38,17 @@
                 
                 <form method="POST" action="{{ url_for('asignar_nota') }}" id="formSeleccionMateria">
                     <label for="id_materia">Selecciona una materia:</label>
-                    <select name="id_materia" id="id_materia" required>
+                    <select name="id_materia" id="id_materia" required style="padding:8px 12px; border-radius:6px; min-width:fit-content;">
                         <option value="">Seleccione una materia</option>
                         {% for materia in materias %}
-                          <option value="{{ materia.id }}" {% if id_materia == materia.id|string %}selected{% endif %}>
-                            {{ materia.nombre }}
-                          </option>
+                            <option value="{{ materia.id }}" {% if id_materia == materia.id|string %}selected{% endif %}>
+                                {{ materia.nombre }}
+                            </option>
                         {% endfor %}
                     </select>
-                    <button type="submit">Buscar Estudiantes</button>
+                    <div style="display:flex; justify-content:center; margin-top:16px;">
+                        <button type="submit" style="padding:12px 28px; border-radius:8px; min-width:fit-content; background:#4facfe; color:white; border:none; width:fit-content; font-size:1.15rem; font-weight:500;">Buscar Estudiantes</button>
+                    </div>
                 </form>
 
                 {% if estudiantes %}
@@ -93,13 +95,19 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    <button type="submit">Asignar Nota</button>
+                    <div style="display:flex; justify-content:center; margin-top:16px;">
+                        <button type="submit" style="padding:12px 28px; border-radius:8px; min-width:fit-content; background:#4facfe; color:white; border:none; width:fit-content; font-size:1.15rem; font-weight:500;">Asignar Nota</button>
+                    </div>
                 </form>
                 {% endif %}
 
-                <a href="{{ url_for('profesor_dashboard') }}" style="text-decoration: none;">
-                    <button type="button" class="btn-back">Volver</button>
-                </a>
+                <div style="display: flex; justify-content: center; margin-top: 2rem;">
+                    <a href="{{ url_for('profesor_dashboard') }}" style="text-decoration: none;">
+                        <div style="display:flex; justify-content:center; margin-top:20px;">
+                            <button type="button" class="btn-back" style="padding:12px 28px; border-radius:8px; min-width:fit-content; background:#747d87; color:white; border:none; width:fit-content; font-size:1.15rem; font-weight:500;">Volver al Dashboard</button>
+                        </div>
+                    </a>
+                </div>
             </div>
         </main>
     </div>
