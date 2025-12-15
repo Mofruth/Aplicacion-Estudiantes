@@ -15,7 +15,7 @@ Campus es una aplicación web para la gestión de estudiantes, profesores, mater
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/Elvis094/EbookStudy.git
+git clone https://github.com/Mofruth/Aplicacion-Estudiante.git
 cd Campus
 ```
 
