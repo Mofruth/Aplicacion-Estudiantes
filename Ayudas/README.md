@@ -62,7 +62,7 @@ connection = mysql.connector.connect(
     host='localhost',
     user='root',  # Tu usuario MySQL
     password='',  # Tu contraseña MySQL
-    database='GestionDeEstudiantes'
+    database='gestiondeestudiantes'
 )
 ```
 
