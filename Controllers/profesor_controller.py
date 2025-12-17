@@ -121,7 +121,7 @@ class ProfesorController:
         return False
 
     @staticmethod
-    def cambiar_nota(id_estudiante, id_materia, nueva_nota, tipo_evaluacion, comentario, id_profesor):
+    def cambiar_nota(id_profesor,id_estudiante, id_materia, nueva_nota, tipo_evaluacion, comentario):
         """Cambia la nota y el comentario de un estudiante en una materia específica para un tipo de evaluación."""
         conexion = create_connection()
         if conexion:

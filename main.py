@@ -893,38 +893,62 @@ def asignar_nota():
         estudiantes=estudiantes,
         id_materia=id_materia
     )
-
 @app.route('/profesor/cambiar_nota', methods=['GET', 'POST'])
 def cambiar_nota():
     if 'usuario' not in session or session['usuario']['tipo'] != 'profesor':
         flash("No tienes permisos para acceder a esta sección.", "error")
         return redirect(url_for('home'))
-    materias = ProfesorController.obtener_materias()
+
+    # Variables iniciales
     estudiantes = []
+    id_materia = None
+    materias = ProfesorController.obtener_materias() 
+
     if request.method == 'POST':
-        id_materia = request.form.get('id_materia')
-        ids_estudiantes = request.form.getlist('id_estudiante[]')
-        nuevas_notas = request.form.getlist('nueva_nota[]')
-        comentarios = request.form.getlist('comentario[]')
-        id_profesor = session['usuario']['id']
+        # CASO 1: Buscar estudiantes de una materia
+        if 'buscar_estudiantes' in request.form or (request.form.get('accion') == 'buscar'):
+            id_materia = request.form.get('id_materia')
+            if id_materia:
+                estudiantes = ProfesorController.obtener_estudiantes_notas(id_materia)
+            else:
+                flash("Por favor, selecciona una materia.", "error")
 
-        if ids_estudiantes and nuevas_notas and comentarios:
-            for i in range(len(ids_estudiantes)):
-                ProfesorController.cambiar_nota(
-                    ids_estudiantes[i],
-                    id_materia,
-                    nuevas_notas[i],
-                    comentarios[i],
-                    id_profesor
-                )
-            flash("Notas y comentarios actualizados correctamente.", "success")
-            return redirect(url_for('cambiar_nota'))
-        elif id_materia:
-            estudiantes = ProfesorController.obtener_estudiantes_por_materia(id_materia)
-        else:
-            flash("Por favor, selecciona una materia.", "error")
+        # CASO 2: Guardar las notas
+        elif 'guardar_notas' in request.form or (request.form.get('accion') == 'guardar'):
+            id_materia = request.form.get('id_materia')
+            id_profesor = session['usuario']['id']
+            
+            # Recibimos las listas del formulario HTML
+            ids_estudiantes = request.form.getlist('id_estudiante[]')
+            # Asegúrate que en tu HTML el input se llame 'nueva_nota[]'
+            nuevas_notas = request.form.getlist('nueva_nota[]') 
+            comentarios = request.form.getlist('comentario[]')
 
-    return render_template('profesor/cambiarNota.html', materias=materias, estudiantes=estudiantes)
+            if ids_estudiantes and nuevas_notas:
+                try:
+                    for i in range(len(ids_estudiantes)):
+                        # Validamos que haya comentario para el índice actual
+                        comentario_actual = comentarios[i] if i < len(comentarios) else ""
+                        
+                        # Llamada corregida con todos los argumentos requeridos
+                        ProfesorController.cambiar_nota(
+                            id_profesor=id_profesor,
+                            id_materia=id_materia,
+                            id_estudiante=ids_estudiantes[i],
+                            nota=nuevas_notas[i],
+                            comentario=comentario_actual  # <--- Solución al TypeError
+                        )
+                    flash("Notas actualizadas correctamente.", "success")
+                except Exception as e:
+                    print(f"Error guardando notas: {e}") 
+                    flash(f"Error al actualizar notas: {e}", "error")
+                
+                # Recargamos la ruta (GET) para ver los cambios
+                return redirect(url_for('cambiar_nota'))
+
+    # CORRECCIÓN DE LA RUTA DEL TEMPLATE:
+    # Flask busca dentro de la carpeta 'Views', así que indicamos la ruta relativa desde ahí.
+    return render_template('Profesor/cambiarNota.html', materias=materias, estudiantes=estudiantes, id_materia=id_materia, usuario=session['usuario'])
 
 
 @app.route('/profesor/enviar_notificacion', methods=['GET', 'POST'])
